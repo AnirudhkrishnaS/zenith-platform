@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.zenith</groupId>
+	<artifactId>zenith-platform</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Zenith Platform</name>
+	<description>Unified affordable delivery platform for local businesses</description>
+
+	<modules>
+		<module>zenith-api-gateway</module>
+		<module>zenith-user-service</module>
+		<module>zenith-store-service</module>
+		<module>zenith-order-service</module>
+		<module>zenith-delivery-service</module>
+		<module>zenith-notification-service</module>
+	</modules>
+
+</project>
