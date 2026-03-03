@@ -63,6 +63,4 @@ public class JwtAuthFilter implements HandlerFilterFunction<ServerResponse, Serv
         return next.handle(forwardRequest);
     }
 
-
-
 }

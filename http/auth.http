@@ -1,0 +1,39 @@
+# ============================================================
+# Zenith – Auth API (via Gateway)
+# ============================================================
+# Base URL: use gateway so all traffic goes through it.
+# Gateway forwards /api/auth/** to user-service (no JWT required).
+# ============================================================
+
+@gateway = http://localhost:8080
+@userService = http://localhost:8081
+
+# ------------------------------------------------------------------------------
+# 1. Register – create a new user (CUSTOMER | BUSINESS_OWNER | DELIVERY_PARTNER)
+# ------------------------------------------------------------------------------
+POST {{gateway}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "customer@example.com",
+  "password": "password123",
+  "fullName": "Jane Customer",
+  "phone": "+1234567890",
+  "userType": "CUSTOMER"
+}
+
+###
+
+
+# ------------------------------------------------------------------------------
+# 2. Login – get JWT token (use this token for /api/users/**)
+# ------------------------------------------------------------------------------
+POST {{gateway}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@example.com",
+  "password": "password123"
+}
+
+###

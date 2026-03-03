@@ -1,0 +1,32 @@
+# ============================================================
+# Zenith – Users API (via Gateway, JWT required)
+# ============================================================
+# These endpoints require a valid JWT. Run auth.http → Login first,
+# copy the "token" from the response, and paste it below in @token.
+# ============================================================
+
+@gateway = http://localhost:8080
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJjdXN0b21lckBleGFtcGxlLmNvbSIsInVzZXJUeXBlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NzI1MjMxNjQsImV4cCI6MTc3MjUyNDA2NH0.CI_2l328yYrvc3UKffx1FR7kdC-bvHjfPEse-QVtri_SObn-HjxtyBtPGZv2QtkMVy9VNxtJa2etB6yKnionrA
+
+# ------------------------------------------------------------------------------
+# 1. Get current user (requires valid JWT)
+# ------------------------------------------------------------------------------
+GET {{gateway}}/api/users/me
+Authorization: Bearer {{token}}
+
+###
+
+
+# ------------------------------------------------------------------------------
+# 2. Update current user profile (requires valid JWT)
+# ------------------------------------------------------------------------------
+PUT {{gateway}}/api/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Jane Customer Updated",
+  "phone": "+1987654321"
+}
+
+###

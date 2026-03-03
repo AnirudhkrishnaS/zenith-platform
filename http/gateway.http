@@ -1,0 +1,32 @@
+# ============================================================
+# Zenith – Gateway sanity checks
+# ============================================================
+# Use this file to verify the gateway is up and that JWT protection
+# works (protected route without token → 401).
+# ============================================================
+
+@gateway = http://localhost:8080
+
+# ------------------------------------------------------------------------------
+# 1. Gateway health (no auth; confirms gateway is running)
+# ------------------------------------------------------------------------------
+GET {{gateway}}/actuator/health
+
+###
+
+
+# ------------------------------------------------------------------------------
+# 2. Protected route WITHOUT token → expect 401 Unauthorized
+# ------------------------------------------------------------------------------
+GET {{gateway}}/api/users/me
+
+###
+
+
+# ------------------------------------------------------------------------------
+# 3. Protected route WITH invalid token → expect 401 Unauthorized
+# ------------------------------------------------------------------------------
+GET {{gateway}}/api/users/me
+Authorization: Bearer invalid-token
+
+###
