@@ -15,17 +15,16 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 public class RouteConfig {
 
     private static final String USER_SERVICE_URI = "http://localhost:8081";
+    private static final String STORE_SERVICE_URI = "http://localhost:8082";
 
     @Bean
     public RouterFunction<ServerResponse> userServiceRoutes(JwtAuthFilter jwtAuthFilter) {
-        // /api/auth/** – register (POST), login (POST) – no JWT required
         RouterFunction<ServerResponse> authRoute = route("user-service-auth")
                 .GET("/api/auth/**", http())
                 .POST("/api/auth/**", http())
                 .before(uri(USER_SERVICE_URI))
                 .build();
 
-        // /api/users/** – getMe (GET), updateMe (PUT) – JWT required; adds X-User-Id, X-User-Type
         RouterFunction<ServerResponse> usersRoute = route("user-service-users")
                 .GET("/api/users/**", http())
                 .PUT("/api/users/**", http())
@@ -33,6 +32,15 @@ public class RouteConfig {
                 .build()
                 .filter(jwtAuthFilter);
 
-        return authRoute.and(usersRoute);
+        RouterFunction<ServerResponse> storesRoute = route("store-service")
+                .GET("/api/stores/**", http())
+                .POST("/api/stores/**", http())
+                .PUT("/api/stores/**", http())
+                .DELETE("/api/stores/**", http())
+                .before(uri(STORE_SERVICE_URI))
+                .build()
+                .filter(jwtAuthFilter);
+
+        return authRoute.and(usersRoute).and(storesRoute);
     }
 }

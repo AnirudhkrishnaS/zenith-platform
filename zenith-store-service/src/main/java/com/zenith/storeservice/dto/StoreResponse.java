@@ -4,10 +4,6 @@ import com.zenith.storeservice.entity.Store;
 
 import java.time.Instant;
 
-/**
- * API response for store data. Used to avoid exposing the entity and to control
- * serialization (e.g. date format, optional fields) for clients.
- */
 public class StoreResponse {
 
     private Long id;

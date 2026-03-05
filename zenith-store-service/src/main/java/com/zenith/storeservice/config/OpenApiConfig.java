@@ -14,7 +14,6 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Zenith Store Service API")
-                        .description("Business (store) and product catalogue management. Business owners register shops and manage products; customers browse stores.")
                         .version("0.0.1"));
     }
 }

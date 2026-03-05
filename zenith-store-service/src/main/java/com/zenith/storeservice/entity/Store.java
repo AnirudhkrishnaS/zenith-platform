@@ -4,11 +4,6 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-/**
- * A business (shop) registered on the platform. Owned by a user (business owner)
- * identified by ownerId (references User Service). Contains store details used for
- * discovery by customers and for order fulfilment.
- */
 @Entity
 @Table(name = "stores")
 public class Store {
@@ -17,10 +12,6 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * User ID of the business owner (from User Service). Not a DB FK to allow
-     * service independence; validated at API layer when required.
-     */
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 

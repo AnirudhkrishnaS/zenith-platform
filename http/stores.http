@@ -1,15 +1,93 @@
-# ============================================================
-# Zenith – Store Service API
-# ============================================================
-# Direct to store service (8082). After gateway route is added,
-# use {{gateway}}/api/stores instead of {{storeService}}.
-# ============================================================
-
 @storeService = http://localhost:8082
+@gateway = http://localhost:8080
+@userId = 1
+@userType = BUSINESS_OWNER
+@storeId = 1
+@productId = 1
+@token =
 
-# ------------------------------------------------------------------------------
-# List all stores (Micro-step 1)
-# ------------------------------------------------------------------------------
 GET {{storeService}}/api/stores
+
+###
+
+GET {{storeService}}/api/stores/{{storeId}}
+
+###
+
+GET {{storeService}}/api/stores/mine
+X-User-Id: {{userId}}
+
+###
+
+POST {{storeService}}/api/stores
+X-User-Id: {{userId}}
+X-User-Type: {{userType}}
+Content-Type: application/json
+
+{
+  "name": "My Coffee Shop",
+  "address": "123 Main St",
+  "phone": "+1234567890",
+  "description": "Best coffee in town"
+}
+
+###
+
+PUT {{storeService}}/api/stores/{{storeId}}
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "name": "My Coffee Shop Updated",
+  "address": "456 New St",
+  "phone": "+9876543210"
+}
+
+###
+
+GET {{storeService}}/api/stores/{{storeId}}/products
+
+###
+
+GET {{storeService}}/api/stores/{{storeId}}/products/{{productId}}
+
+###
+
+POST {{storeService}}/api/stores/{{storeId}}/products
+X-User-Id: {{userId}}
+X-User-Type: {{userType}}
+Content-Type: application/json
+
+{
+  "name": "Espresso",
+  "description": "Single shot",
+  "price": 2.50
+}
+
+###
+
+PUT {{storeService}}/api/stores/{{storeId}}/products/{{productId}}
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "name": "Double Espresso",
+  "price": 3.50
+}
+
+###
+
+DELETE {{storeService}}/api/stores/{{storeId}}/products/{{productId}}
+X-User-Id: {{userId}}
+
+###
+
+GET {{gateway}}/api/stores
+Authorization: Bearer {{token}}
+
+###
+
+GET {{gateway}}/api/stores/mine
+Authorization: Bearer {{token}}
 
 ###
