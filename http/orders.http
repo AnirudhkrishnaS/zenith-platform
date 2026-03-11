@@ -1,0 +1,19 @@
+@orderService = http://localhost:8083
+@userId = 1
+@userType = CUSTOMER
+@storeId = 1
+
+POST {{orderService}}/api/orders
+X-User-Id: {{userId}}
+X-User-Type: {{userType}}
+Content-Type: application/json
+
+{
+  "storeId": {{storeId}},
+  "items": [
+    { "sku": "MARG-PIZZA-M", "quantity": 2 },
+    { "sku": "ESPRESSO-02", "quantity": 1 }
+  ]
+}
+
+###

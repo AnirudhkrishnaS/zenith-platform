@@ -2,32 +2,39 @@ package com.zenith.storeservice.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Logical product (e.g. "Margherita Pizza", "T-Shirt"). Can have multiple SKUs (variants: sizes, options).
+ * Sellable variant under a Product. One product (e.g. "T-Shirt") can have many SKUs (S-Red, M-Blue, etc.).
+ * Orders reference SKU (by sku code or UPC), not product.
  */
 @Entity
-@Table(name = "products")
-public class Product {
+@Table(name = "skus", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"store_id", "sku_code"}),
+        @UniqueConstraint(columnNames = {"store_id", "upc"})
+})
+public class Sku {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
     @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(nullable = false, length = 255)
-    private String name;
+    @Column(name = "sku_code", nullable = false, length = 64)
+    private String skuCode;
 
-    @Column(length = 2000)
-    private String description;
+    @Column(length = 32)
+    private String upc;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Sku> skus = new ArrayList<>();
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -35,7 +42,7 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public Product() {
+    public Sku() {
     }
 
     @PrePersist
@@ -52,14 +59,16 @@ public class Product {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
     public Long getStoreId() { return storeId; }
     public void setStoreId(Long storeId) { this.storeId = storeId; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public List<Sku> getSkus() { return skus; }
-    public void setSkus(List<Sku> skus) { this.skus = skus; }
+    public String getSkuCode() { return skuCode; }
+    public void setSkuCode(String skuCode) { this.skuCode = skuCode; }
+    public String getUpc() { return upc; }
+    public void setUpc(String upc) { this.upc = upc; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

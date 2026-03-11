@@ -53,6 +53,15 @@ GET {{storeService}}/api/stores/{{storeId}}/products/{{productId}}
 
 ###
 
+GET {{storeService}}/api/stores/{{storeId}}/products/sku/ESPRESSO-01
+
+###
+
+GET {{storeService}}/api/stores/{{storeId}}/products/upc/012345678905
+
+###
+
+# Two-level: 1) Create product (logical), 2) Add SKUs (sellable variants)
 POST {{storeService}}/api/stores/{{storeId}}/products
 X-User-Id: {{userId}}
 X-User-Type: {{userType}}
@@ -60,8 +69,32 @@ Content-Type: application/json
 
 {
   "name": "Espresso",
-  "description": "Single shot",
+  "description": "Single shot"
+}
+
+###
+# Add first SKU (e.g. size/variant) to product; use productId from create response
+POST {{storeService}}/api/stores/{{storeId}}/products/{{productId}}/skus
+X-User-Id: {{userId}}
+X-User-Type: {{userType}}
+Content-Type: application/json
+
+{
+  "sku": "ESPRESSO-01",
+  "upc": "012345678905",
   "price": 2.50
+}
+
+###
+# Add another SKU to same product (e.g. large size)
+POST {{storeService}}/api/stores/{{storeId}}/products/{{productId}}/skus
+X-User-Id: {{userId}}
+X-User-Type: {{userType}}
+Content-Type: application/json
+
+{
+  "sku": "ESPRESSO-02",
+  "price": 3.50
 }
 
 ###
@@ -71,17 +104,22 @@ X-User-Id: {{userId}}
 Content-Type: application/json
 
 {
-  "name": "Double Espresso",
-  "price": 3.50
+  "name": "Espresso (updated)",
+  "description": "Single or double shot"
 }
 
 ###
 
+# Delete product (cascades to all its SKUs)
 DELETE {{storeService}}/api/stores/{{storeId}}/products/{{productId}}
 X-User-Id: {{userId}}
 
 ###
+# Or delete a single SKU (use skuId from list/get product response)
+# DELETE {{storeService}}/api/stores/{{storeId}}/products/{{productId}}/skus/{{skuId}}
+# X-User-Id: {{userId}}
 
+###
 GET {{gateway}}/api/stores
 Authorization: Bearer {{token}}
 
