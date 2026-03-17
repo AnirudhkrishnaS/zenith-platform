@@ -1,19 +1,112 @@
 @orderService = http://localhost:8083
-@userId = 1
-@userType = CUSTOMER
+@customerId = 1
+@customerType = CUSTOMER
+@ownerId = 2
+@ownerType = BUSINESS_OWNER
 @storeId = 1
+@orderId = 1
+
+### Place order (as customer)
 
 POST {{orderService}}/api/orders
-X-User-Id: {{userId}}
-X-User-Type: {{userType}}
+X-User-Id: {{customerId}}
+X-User-Type: {{customerType}}
 Content-Type: application/json
 
 {
   "storeId": {{storeId}},
   "items": [
     { "sku": "MARG-PIZZA-M", "quantity": 2 },
-    { "sku": "ESPRESSO-02", "quantity": 1 }
+    { "sku": "ESPRESSO-01", "quantity": 1 }
   ]
 }
+
+### Get order by id (as customer)
+
+GET {{orderService}}/api/orders/{{orderId}}
+X-User-Id: {{customerId}}
+X-User-Type: {{customerType}}
+
+### Get order by id (as store owner)
+
+GET {{orderService}}/api/orders/{{orderId}}
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### Get my orders (customer)
+
+GET {{orderService}}/api/orders/mine
+X-User-Id: {{customerId}}
+
+### Get store orders (store owner)
+
+GET {{orderService}}/api/orders/store/{{storeId}}
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### ──── Status transitions ────
+
+### Accept order (store owner) — PLACED → ACCEPTED
+
+PUT {{orderService}}/api/orders/{{orderId}}/accept
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### Reject order (store owner) — PLACED → REJECTED
+
+PUT {{orderService}}/api/orders/{{orderId}}/reject
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+Content-Type: application/json
+
+{
+  "reason": "Store closing in 10 minutes"
+}
+
+### Start preparing (store owner) — ACCEPTED → PREPARING
+
+PUT {{orderService}}/api/orders/{{orderId}}/prepare
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### Mark ready for pickup (store owner) — PREPARING → READY_FOR_PICKUP
+
+PUT {{orderService}}/api/orders/{{orderId}}/ready
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### Cancel order (customer) — PLACED or ACCEPTED → CANCELLED
+
+PUT {{orderService}}/api/orders/{{orderId}}/cancel
+X-User-Id: {{customerId}}
+Content-Type: application/json
+
+{
+  "reason": "Changed my mind"
+}
+
+### Cancel order without reason (customer)
+
+PUT {{orderService}}/api/orders/{{orderId}}/cancel
+X-User-Id: {{customerId}}
+
+### ──── Error cases ────
+
+### Accept already-accepted order (should return 409)
+
+PUT {{orderService}}/api/orders/{{orderId}}/accept
+X-User-Id: {{ownerId}}
+X-User-Type: {{ownerType}}
+
+### Cancel a preparing order (should return 409)
+
+PUT {{orderService}}/api/orders/{{orderId}}/cancel
+X-User-Id: {{customerId}}
+
+### Accept as wrong user (should return 403)
+
+PUT {{orderService}}/api/orders/{{orderId}}/accept
+X-User-Id: 999
+X-User-Type: BUSINESS_OWNER
 
 ###

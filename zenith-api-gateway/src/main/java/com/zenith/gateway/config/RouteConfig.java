@@ -16,6 +16,8 @@ public class RouteConfig {
 
     private static final String USER_SERVICE_URI = "http://localhost:8081";
     private static final String STORE_SERVICE_URI = "http://localhost:8082";
+    private static final String ORDER_SERVICE_URI = "http://localhost:8083";
+    private static final String INVENTORY_SERVICE_URI = "http://localhost:8084";
 
     @Bean
     public RouterFunction<ServerResponse> userServiceRoutes(JwtAuthFilter jwtAuthFilter) {
@@ -41,6 +43,21 @@ public class RouteConfig {
                 .build()
                 .filter(jwtAuthFilter);
 
-        return authRoute.and(usersRoute).and(storesRoute);
+        RouterFunction<ServerResponse> ordersRoute = route("order-service")
+                .GET("/api/orders/**", http())
+                .POST("/api/orders/**", http())
+                .PUT("/api/orders/**", http())
+                .before(uri(ORDER_SERVICE_URI))
+                .build()
+                .filter(jwtAuthFilter);
+
+        RouterFunction<ServerResponse> inventoryRoute = route("inventory-service")
+                .GET("/api/inventory/**", http())
+                .POST("/api/inventory/**", http())
+                .before(uri(INVENTORY_SERVICE_URI))
+                .build()
+                .filter(jwtAuthFilter);
+
+        return authRoute.and(usersRoute).and(storesRoute).and(ordersRoute).and(inventoryRoute);
     }
 }

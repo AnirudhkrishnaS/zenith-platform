@@ -1,6 +1,6 @@
 package com.zenith.userservice.dto;
 
-import com.zenith.userservice.entity.UserType;
+import com.zenith.userservice.enums.UserType;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,5 +1,7 @@
 package com.zenith.userservice.entity;
 
+import com.zenith.userservice.enums.UserType;
+
 import jakarta.persistence.*;
 
 import java.time.Instant;

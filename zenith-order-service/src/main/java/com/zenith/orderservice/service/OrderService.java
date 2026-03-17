@@ -6,9 +6,14 @@ import com.zenith.orderservice.dto.OrderResponse;
 import com.zenith.orderservice.dto.PlaceOrderRequest;
 import com.zenith.orderservice.entity.Order;
 import com.zenith.orderservice.entity.OrderItem;
-import com.zenith.orderservice.entity.OrderStatus;
-import com.zenith.orderservice.entity.PaymentStatus;
+import com.zenith.orderservice.enums.OrderStatus;
+import com.zenith.orderservice.enums.PaymentStatus;
+import com.zenith.orderservice.event.OrderEvent;
+import com.zenith.orderservice.event.OrderEventPublisher;
 import com.zenith.orderservice.exception.BadOrderRequestException;
+import com.zenith.orderservice.exception.ForbiddenException;
+import com.zenith.orderservice.exception.IllegalStatusTransitionException;
+import com.zenith.orderservice.exception.OrderNotFoundException;
 import com.zenith.orderservice.repository.OrderRepository;
 
 import org.springframework.stereotype.Service;
@@ -17,16 +22,127 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final StoreServiceClient storeClient;
+    private final OrderEventPublisher eventPublisher;
 
-    public OrderService(OrderRepository orderRepository, StoreServiceClient storeClient) {
+    public OrderService(OrderRepository orderRepository,
+                        StoreServiceClient storeClient,
+                        OrderEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.storeClient = storeClient;
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getById(Long orderId, Long userId, String userType) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        boolean isCustomer = order.getCustomerId().equals(userId);
+        boolean isStoreOwner = "BUSINESS_OWNER".equals(userType)
+                && userId.equals(storeClient.getStoreOwnerId(order.getStoreId()));
+
+        if (!isCustomer && !isStoreOwner) {
+            throw new ForbiddenException("You do not have access to this order");
+        }
+        return OrderResponse.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getMyOrders(Long customerId) {
+        return orderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId).stream()
+                .map(OrderResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getStoreOrders(Long storeId, Long userId) {
+        Long ownerId = storeClient.getStoreOwnerId(storeId);
+        if (ownerId == null || !ownerId.equals(userId)) {
+            throw new ForbiddenException("You are not the owner of this store");
+        }
+        return orderRepository.findByStoreIdOrderByCreatedAtDesc(storeId).stream()
+                .map(OrderResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public OrderResponse acceptOrder(Long orderId, Long userId) {
+        Order order = findOrderForStoreOwner(orderId, userId);
+        OrderStatus prev = order.getStatus();
+        transition(order, OrderStatus.ACCEPTED);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.accepted", saved, prev));
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse rejectOrder(Long orderId, Long userId, String reason) {
+        Order order = findOrderForStoreOwner(orderId, userId);
+        OrderStatus prev = order.getStatus();
+        transition(order, OrderStatus.REJECTED);
+        order.setRejectReason(reason);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.rejected", saved, prev));
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse prepareOrder(Long orderId, Long userId) {
+        Order order = findOrderForStoreOwner(orderId, userId);
+        OrderStatus prev = order.getStatus();
+        transition(order, OrderStatus.PREPARING);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.preparing", saved, prev));
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse readyOrder(Long orderId, Long userId) {
+        Order order = findOrderForStoreOwner(orderId, userId);
+        OrderStatus prev = order.getStatus();
+        transition(order, OrderStatus.READY_FOR_PICKUP);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.ready_for_pickup", saved, prev));
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId, Long customerId, String reason) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        if (!order.getCustomerId().equals(customerId)) {
+            throw new ForbiddenException("You can only cancel your own orders");
+        }
+        OrderStatus prev = order.getStatus();
+        transition(order, OrderStatus.CANCELLED);
+        order.setCancelReason(reason);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.cancelled", saved, prev));
+        return OrderResponse.from(saved);
+    }
+
+    private Order findOrderForStoreOwner(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        Long ownerId = storeClient.getStoreOwnerId(order.getStoreId());
+        if (ownerId == null || !ownerId.equals(userId)) {
+            throw new ForbiddenException("You are not the owner of this store");
+        }
+        return order;
+    }
+
+    private void transition(Order order, OrderStatus target) {
+        if (!order.getStatus().canTransitionTo(target)) {
+            throw new IllegalStatusTransitionException(order.getStatus(), target);
+        }
+        order.setStatus(target);
     }
 
     @Transactional
@@ -70,6 +186,7 @@ public class OrderService {
         order.setItems(items);
 
         Order saved = orderRepository.save(order);
+        eventPublisher.publish(OrderEvent.from("order.placed", saved, null));
         return OrderResponse.from(saved);
     }
 

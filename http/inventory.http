@@ -1,0 +1,61 @@
+@gateway = http://localhost:8080
+@token = Bearer <your-jwt-token>
+
+### ── Restock: store owner adds 50 units of SKU 1 to store 1 ─────────
+POST {{gateway}}/api/inventory/restock
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "skuId": 1,
+  "storeId": 1,
+  "quantity": 50,
+  "reason": "Initial stock"
+}
+
+### ── Check stock for SKU 1 at store 1 ───────────────────────────────
+GET {{gateway}}/api/inventory/1/store/1
+Authorization: {{token}}
+
+### ── Check all stock at store 1 ─────────────────────────────────────
+GET {{gateway}}/api/inventory/store/1
+Authorization: {{token}}
+
+### ── Reserve stock (called by Order Service during order placement) ──
+POST {{gateway}}/api/inventory/reserve
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "orderId": 1,
+  "storeId": 1,
+  "items": [
+    { "skuId": 1, "quantity": 2 },
+    { "skuId": 2, "quantity": 1 }
+  ]
+}
+
+### ── Commit reservation (items picked from shelf, order preparing) ──
+POST {{gateway}}/api/inventory/commit/1
+Authorization: {{token}}
+
+### ── Release reservation (order cancelled) ──────────────────────────
+POST {{gateway}}/api/inventory/release/1
+Authorization: {{token}}
+
+### ── Error: reserve more than available ─────────────────────────────
+POST {{gateway}}/api/inventory/reserve
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "orderId": 99,
+  "storeId": 1,
+  "items": [
+    { "skuId": 1, "quantity": 9999 }
+  ]
+}
+
+### ── Error: check stock for non-existent SKU ────────────────────────
+GET {{gateway}}/api/inventory/999/store/1
+Authorization: {{token}}

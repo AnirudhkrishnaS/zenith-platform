@@ -1,4 +1,4 @@
-package com.zenith.userservice.entity;
+package com.zenith.userservice.enums;
 
 public enum UserType {
     CUSTOMER,

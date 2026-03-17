@@ -1,6 +1,6 @@
 package com.zenith.userservice.security;
 
-import com.zenith.userservice.entity.UserType;
+import com.zenith.userservice.enums.UserType;
 
 import java.util.Collections;
 

@@ -1,4 +1,4 @@
-package com.zenith.orderservice.entity;
+package com.zenith.orderservice.enums;
 
 public enum PaymentStatus {
     PENDING,

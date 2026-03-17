@@ -1,6 +1,6 @@
 package com.zenith.userservice.util;
 
-import com.zenith.userservice.entity.UserType;
+import com.zenith.userservice.enums.UserType;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

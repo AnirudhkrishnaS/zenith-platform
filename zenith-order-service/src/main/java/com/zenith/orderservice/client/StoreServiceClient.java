@@ -95,5 +95,21 @@ public class StoreServiceClient {
         return new ProductInfo(productId, sku, upc, name, price);
     }
 
+    public Long getStoreOwnerId(Long storeId) {
+        try {
+            Map<?, ?> body = restClient.get()
+                    .uri("/api/stores/{id}", storeId)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                        throw new RuntimeException("not found");
+                    })
+                    .body(Map.class);
+            if (body == null) return null;
+            return body.get("ownerId") != null ? Long.valueOf(body.get("ownerId").toString()) : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public record ProductInfo(Long productId, String sku, String upc, String name, BigDecimal price) {}
 }

@@ -1,8 +1,8 @@
 package com.zenith.orderservice.dto;
 
 import com.zenith.orderservice.entity.Order;
-import com.zenith.orderservice.entity.OrderStatus;
-import com.zenith.orderservice.entity.PaymentStatus;
+import com.zenith.orderservice.enums.OrderStatus;
+import com.zenith.orderservice.enums.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,6 +17,8 @@ public class OrderResponse {
     private OrderStatus status;
     private PaymentStatus paymentStatus;
     private BigDecimal total;
+    private String rejectReason;
+    private String cancelReason;
     private List<OrderItemResponse> items;
     private Instant createdAt;
     private Instant updatedAt;
@@ -29,6 +31,8 @@ public class OrderResponse {
         r.setStatus(order.getStatus());
         r.setPaymentStatus(order.getPaymentStatus());
         r.setTotal(order.getTotal());
+        r.setRejectReason(order.getRejectReason());
+        r.setCancelReason(order.getCancelReason());
         r.setItems(order.getItems().stream()
                 .map(OrderItemResponse::from)
                 .collect(Collectors.toList()));
@@ -49,6 +53,10 @@ public class OrderResponse {
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+    public String getRejectReason() { return rejectReason; }
+    public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
     public List<OrderItemResponse> getItems() { return items; }
     public void setItems(List<OrderItemResponse> items) { this.items = items; }
     public Instant getCreatedAt() { return createdAt; }

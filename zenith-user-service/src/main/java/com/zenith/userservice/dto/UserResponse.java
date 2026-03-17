@@ -1,7 +1,7 @@
 package com.zenith.userservice.dto;
 
 import com.zenith.userservice.entity.User;
-import com.zenith.userservice.entity.UserType;
+import com.zenith.userservice.enums.UserType;
 
 import java.time.Instant;
 

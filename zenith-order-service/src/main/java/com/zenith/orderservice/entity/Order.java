@@ -1,5 +1,8 @@
 package com.zenith.orderservice.entity;
 
+import com.zenith.orderservice.enums.OrderStatus;
+import com.zenith.orderservice.enums.PaymentStatus;
+
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -31,6 +34,12 @@ public class Order {
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
+
+    @Column(name = "reject_reason", length = 500)
+    private String rejectReason;
+
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
@@ -68,6 +77,10 @@ public class Order {
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+    public String getRejectReason() { return rejectReason; }
+    public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
     public Instant getCreatedAt() { return createdAt; }
