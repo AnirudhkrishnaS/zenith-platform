@@ -21,13 +21,13 @@ Authorization: {{token}}
 GET {{gateway}}/api/inventory/store/1
 Authorization: {{token}}
 
-### ── Reserve stock (called by Order Service during order placement) ──
+### ── Reserve stock (orderId = business order number, e.g. ZEN-000001) ──
 POST {{gateway}}/api/inventory/reserve
 Content-Type: application/json
 Authorization: {{token}}
 
 {
-  "orderId": 1,
+  "orderId": "ZEN-000001",
   "storeId": 1,
   "items": [
     { "skuId": 1, "quantity": 2 },
@@ -36,11 +36,11 @@ Authorization: {{token}}
 }
 
 ### ── Commit reservation (items picked from shelf, order preparing) ──
-POST {{gateway}}/api/inventory/commit/1
+POST {{gateway}}/api/inventory/commit/ZEN-000001
 Authorization: {{token}}
 
 ### ── Release reservation (order cancelled) ──────────────────────────
-POST {{gateway}}/api/inventory/release/1
+POST {{gateway}}/api/inventory/release/ZEN-000001
 Authorization: {{token}}
 
 ### ── Error: reserve more than available ─────────────────────────────
@@ -49,7 +49,7 @@ Content-Type: application/json
 Authorization: {{token}}
 
 {
-  "orderId": 99,
+  "orderId": "ZEN-000099",
   "storeId": 1,
   "items": [
     { "skuId": 1, "quantity": 9999 }

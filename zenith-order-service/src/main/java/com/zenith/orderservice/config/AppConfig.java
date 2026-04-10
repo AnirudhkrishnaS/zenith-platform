@@ -9,9 +9,12 @@ import org.springframework.web.client.RestClient;
 public class AppConfig {
 
     @Bean
-    public RestClient storeRestClient(@Value("${store-service.url:http://localhost:8082}") String baseUrl) {
-        return RestClient.builder()
-                .baseUrl(baseUrl)
-                .build();
+    public RestClient storeRestClient(@Value("${store-service.url:http://localhost:8082}") String storeUrl) {
+        return RestClient.builder().baseUrl(storeUrl).build();
+    }
+
+    @Bean
+    public RestClient inventoryRestClient(@Value("${inventory-service.url:http://localhost:8084}") String inventoryUrl) {
+        return RestClient.builder().baseUrl(inventoryUrl).build();
     }
 }

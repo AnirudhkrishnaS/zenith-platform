@@ -53,13 +53,13 @@ public class InventoryController {
     }
 
     @PostMapping("/commit/{orderId}")
-    public ResponseEntity<Map<String, String>> commit(@PathVariable Long orderId) {
+    public ResponseEntity<Map<String, String>> commit(@PathVariable String orderId) {
         inventoryService.commitReservation(orderId);
         return ResponseEntity.ok(Map.of("status", "committed"));
     }
 
     @PostMapping("/release/{orderId}")
-    public ResponseEntity<Map<String, String>> release(@PathVariable Long orderId) {
+    public ResponseEntity<Map<String, String>> release(@PathVariable String orderId) {
         inventoryService.releaseReservation(orderId);
         return ResponseEntity.ok(Map.of("status", "released"));
     }

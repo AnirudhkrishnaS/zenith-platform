@@ -44,7 +44,7 @@ public class InventoryService {
     @Transactional
     public void reserve(ReserveRequest request) {
         Long storeId = request.getStoreId();
-        Long orderId = request.getOrderId();
+        String orderId = request.getOrderId();
 
         for (ReserveRequest.Item item : request.getItems()) {
             int updated = inventoryRepo.reserve(item.getSkuId(), storeId, item.getQuantity());
@@ -74,7 +74,7 @@ public class InventoryService {
      * reserved stock goes down, reservation status -> COMMITTED.
      */
     @Transactional
-    public void commitReservation(Long orderId) {
+    public void commitReservation(String orderId) {
         List<StockReservation> reservations =
                 reservationRepo.findByOrderIdAndStatus(orderId, ReservationStatus.RESERVED);
 
@@ -101,7 +101,7 @@ public class InventoryService {
      * Release = order cancelled before pick. Reserved stock returns to available pool.
      */
     @Transactional
-    public void releaseReservation(Long orderId) {
+    public void releaseReservation(String orderId) {
         List<StockReservation> reservations =
                 reservationRepo.findByOrderIdAndStatus(orderId, ReservationStatus.RESERVED);
 

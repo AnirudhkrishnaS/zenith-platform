@@ -18,8 +18,8 @@ public class StockReservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @Column(name = "order_id", nullable = false, length = 32)
+    private String orderId;
 
     @Column(name = "sku_id", nullable = false)
     private Long skuId;
@@ -57,8 +57,8 @@ public class StockReservation {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Long getOrderId() { return orderId; }
-    public void setOrderId(Long orderId) { this.orderId = orderId; }
+    public String getOrderId() { return orderId; }
+    public void setOrderId(String orderId) { this.orderId = orderId; }
     public Long getSkuId() { return skuId; }
     public void setSkuId(Long skuId) { this.skuId = skuId; }
     public Long getStoreId() { return storeId; }

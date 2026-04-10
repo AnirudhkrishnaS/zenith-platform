@@ -15,8 +15,10 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "order_number", unique = true, nullable = false, length = 32)
+    private String orderNumber;
 
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
@@ -67,6 +69,8 @@ public class Order {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public String getOrderNumber() { return orderNumber; }
+    public void setOrderNumber(String orderNumber) { this.orderNumber = orderNumber; }
     public Long getCustomerId() { return customerId; }
     public void setCustomerId(Long customerId) { this.customerId = customerId; }
     public Long getStoreId() { return storeId; }

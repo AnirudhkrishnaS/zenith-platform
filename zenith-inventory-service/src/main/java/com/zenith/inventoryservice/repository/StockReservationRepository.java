@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface StockReservationRepository extends JpaRepository<StockReservation, Long> {
 
-    List<StockReservation> findByOrderIdAndStatus(Long orderId, ReservationStatus status);
+    List<StockReservation> findByOrderIdAndStatus(String orderId, ReservationStatus status);
 }

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class OrderResponse {
 
     private Long id;
+    private String orderNumber;
     private Long customerId;
     private Long storeId;
     private OrderStatus status;
@@ -26,6 +27,7 @@ public class OrderResponse {
     public static OrderResponse from(Order order) {
         OrderResponse r = new OrderResponse();
         r.setId(order.getId());
+        r.setOrderNumber(order.getOrderNumber());
         r.setCustomerId(order.getCustomerId());
         r.setStoreId(order.getStoreId());
         r.setStatus(order.getStatus());
@@ -43,6 +45,8 @@ public class OrderResponse {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public String getOrderNumber() { return orderNumber; }
+    public void setOrderNumber(String orderNumber) { this.orderNumber = orderNumber; }
     public Long getCustomerId() { return customerId; }
     public void setCustomerId(Long customerId) { this.customerId = customerId; }
     public Long getStoreId() { return storeId; }

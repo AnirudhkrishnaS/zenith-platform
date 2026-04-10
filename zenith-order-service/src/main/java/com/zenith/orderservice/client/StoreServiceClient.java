@@ -84,15 +84,15 @@ public class StoreServiceClient {
     }
 
     private ProductInfo mapToProductInfo(Long storeId, Map<?, ?> body) {
-        System.out.println(body);
-        Long productId = body.get("productId") != null ? Long.valueOf(body.get("id").toString()) : null;
+        Long productId = body.get("productId") != null ? Long.valueOf(body.get("productId").toString()) : null;
+        Long skuId = body.get("id") != null ? Long.valueOf(body.get("id").toString()) : null;
         String sku = (String) body.get("sku");
         String upc = (String) body.get("upc");
         String name = body.get("productName") != null ? (String) body.get("productName") : (String) body.get("name");
         BigDecimal price = new BigDecimal(body.get("price").toString());
         Long returnedStoreId = body.get("storeId") != null ? Long.valueOf(body.get("storeId").toString()) : null;
         if (returnedStoreId == null || !returnedStoreId.equals(storeId)) return null;
-        return new ProductInfo(productId, sku, upc, name, price);
+        return new ProductInfo(productId, skuId, sku, upc, name, price);
     }
 
     public Long getStoreOwnerId(Long storeId) {
@@ -111,5 +111,5 @@ public class StoreServiceClient {
         }
     }
 
-    public record ProductInfo(Long productId, String sku, String upc, String name, BigDecimal price) {}
+    public record ProductInfo(Long productId, Long skuId, String sku, String upc, String name, BigDecimal price) {}
 }

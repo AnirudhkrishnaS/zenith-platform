@@ -1,5 +1,6 @@
 package com.zenith.orderservice.service;
 
+import com.zenith.orderservice.client.InventoryServiceClient;
 import com.zenith.orderservice.client.StoreServiceClient;
 import com.zenith.orderservice.client.StoreServiceClient.ProductInfo;
 import com.zenith.orderservice.dto.OrderResponse;
@@ -27,15 +28,20 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
 
+    private static final String ORDER_NUMBER_PREFIX = "ZEN-";
+
     private final OrderRepository orderRepository;
     private final StoreServiceClient storeClient;
+    private final InventoryServiceClient inventoryClient;
     private final OrderEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository,
                         StoreServiceClient storeClient,
+                        InventoryServiceClient inventoryClient,
                         OrderEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.storeClient = storeClient;
+        this.inventoryClient = inventoryClient;
         this.eventPublisher = eventPublisher;
     }
 
@@ -86,6 +92,7 @@ public class OrderService {
     public OrderResponse rejectOrder(Long orderId, Long userId, String reason) {
         Order order = findOrderForStoreOwner(orderId, userId);
         OrderStatus prev = order.getStatus();
+        inventoryClient.release(order.getOrderNumber());
         transition(order, OrderStatus.REJECTED);
         order.setRejectReason(reason);
         Order saved = orderRepository.save(order);
@@ -97,6 +104,7 @@ public class OrderService {
     public OrderResponse prepareOrder(Long orderId, Long userId) {
         Order order = findOrderForStoreOwner(orderId, userId);
         OrderStatus prev = order.getStatus();
+        inventoryClient.commit(order.getOrderNumber());
         transition(order, OrderStatus.PREPARING);
         Order saved = orderRepository.save(order);
         eventPublisher.publish(OrderEvent.from("order.preparing", saved, prev));
@@ -121,6 +129,7 @@ public class OrderService {
             throw new ForbiddenException("You can only cancel your own orders");
         }
         OrderStatus prev = order.getStatus();
+        inventoryClient.release(order.getOrderNumber());
         transition(order, OrderStatus.CANCELLED);
         order.setCancelReason(reason);
         Order saved = orderRepository.save(order);
@@ -152,6 +161,7 @@ public class OrderService {
         }
 
         List<OrderItem> items = new ArrayList<>();
+        List<InventoryServiceClient.ReserveItem> reserveItems = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
         for (PlaceOrderRequest.Item reqItem : request.getItems()) {
@@ -160,6 +170,8 @@ public class OrderService {
                 String identifier = reqItem.getSku() != null ? "sku " + reqItem.getSku() : "upc " + reqItem.getUpc();
                 throw new BadOrderRequestException("Product not found for " + identifier + " in store " + request.getStoreId());
             }
+
+            reserveItems.add(new InventoryServiceClient.ReserveItem(product.skuId(), reqItem.getQuantity()));
 
             OrderItem item = new OrderItem();
             item.setProductId(product.productId());
@@ -173,7 +185,15 @@ public class OrderService {
             total = total.add(product.price().multiply(BigDecimal.valueOf(reqItem.getQuantity())));
         }
 
+        long seq = orderRepository.getNextOrderNumber();
+        String orderNumber = ORDER_NUMBER_PREFIX + String.format("%06d", seq);
+
+        //TODO reserve succeeded, order row never (or no longer) exists → stuck/orphan reservations.(Two logic : Periodic Job or Catch exception reserve)
+        inventoryClient.reserve(orderNumber, request.getStoreId(), reserveItems);
+
         Order order = new Order();
+        order.setId(seq);
+        order.setOrderNumber(orderNumber);
         order.setCustomerId(customerId);
         order.setStoreId(request.getStoreId());
         order.setStatus(OrderStatus.PLACED);
